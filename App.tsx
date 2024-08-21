@@ -8,7 +8,7 @@
  * @format
  */
 
-import React, {type PropsWithChildren} from 'react';
+import React, {useEffect, type PropsWithChildren} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -26,6 +26,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import {socket} from './socket';
 
 const Section: React.FC<
   PropsWithChildren<{
@@ -63,6 +64,18 @@ const App = () => {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useEffect(() => {
+    socket.connect();
+    socket.on('receive-event', res => {
+      if (res) {
+        console.log(res.data.coordinates);
+      }
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket]);
 
   return (
     <SafeAreaView style={backgroundStyle}>
