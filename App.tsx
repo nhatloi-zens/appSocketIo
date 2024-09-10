@@ -8,24 +8,19 @@
  * @format
  */
 
-import React, {useEffect, type PropsWithChildren} from 'react';
+import React, {useEffect, useState, type PropsWithChildren} from 'react';
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors, Header} from 'react-native/Libraries/NewAppScreen';
 import {socket} from './socket';
 
 const Section: React.FC<
@@ -67,15 +62,27 @@ const App = () => {
 
   useEffect(() => {
     socket.connect();
+
+    socket.emit('user-connection', {userId: '1'});
+
     socket.on('receive-event', res => {
       if (res) {
-        console.log(res.data.coordinates);
+        setData(JSON.stringify(res.data));
       }
     });
+
+    socket.on('receive-users', res => {
+      if (res) {
+        console.log(res);
+      }
+    });
+
     return () => {
       socket.disconnect();
     };
   }, [socket]);
+
+  const [data, setData] = useState<string>('');
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -87,24 +94,33 @@ const App = () => {
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
         <Header />
+
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          <View
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <TouchableOpacity
+              style={{
+                width: 100,
+                height: 60,
+                backgroundColor: 'green',
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: 12,
+              }}
+              onPress={() => {
+                setData('');
+              }}>
+              <Text style={{color: 'white'}}>Clear</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={{textAlign: 'center'}}>Data response : {data}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
